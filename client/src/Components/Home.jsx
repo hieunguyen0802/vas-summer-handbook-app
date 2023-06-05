@@ -57,7 +57,7 @@ const Home = () => {
 
   /*------*/
 
-  
+
   /*Data table */
   const handleChange = ({ selectedRows }) => {
     console.log("Selected Rows: ", selectedRows);
@@ -161,7 +161,7 @@ const Home = () => {
     ).then((response) => response.json());
 
     // update the state
-    setStudentTable(response.slice(0, 3));
+    setStudentTable(response.slice(0, 2));
   };
 
   useEffect(() => {
