@@ -1,93 +1,29 @@
-import DataTable from "react-data-table-component";
-import { useState,useEffect } from "react";
-import Alert from 'react-bootstrap/Alert';
+import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
+import { useRef } from 'react';
 
 function TooltipPositionedExample() {
-
-  const [studentTable, setStudentTable] = useState();
-  const [showAlert, setShowAlert] = useState('');
-  
-  const getApiData = async () => {
-    const params = "vinguyen199@gmail.com"
-    await fetch("/getTestTable?email="+params)
-      .then((res) => res.json())
-      .then(
-        (result) => {          
-          console.log(result);
-          setShowAlert("success");
-          setStudentTable(result);
-        },
-        (error) => {
-          setShowAlert("fail");
-          console.log(error)     
-        }
-      );
-      
+  const ref = useRef(null)
+    const handleMe=() => {
+    const params = sessionStorage.getItem("student");
+    const obj = JSON.parse(params)
+    console.log(obj)
+    console.log(ref)
+    console.log(ref.current.value)
+    if (ref.current.value != null){
+      console.log("empty")
     }
-    useEffect(() => {
-      getApiData();
-    }, []);
-    
- 
-  if(showAlert==="fail") {
-    return (
-      <Alert variant="danger" onClose={() => setShowAlert('')} dismissible >
-        <Alert.Heading>Oh snap! You got an error!</Alert.Heading>
-      </Alert>
-    );
-  } else if (showAlert ==="success") {
-    return (
-      <center>
-      <Alert variant="success" onClose={() => setShowAlert('')} dismissible style={{ width: "42rem" }}>
-        <Alert.Heading>Thank you</Alert.Heading>
-      </Alert>
-      </center>
-    );
   }
-
-  const columns = [
-    {
-      name: "Student Code",
-      selector: (row) => row.studentCode,
-    },
-    {
-      name: "Student Name",
-      selector: (row) => row.studentName,
-    },
-    {
-      name: "Gender",
-      selector: (row) => row.gender ==="M" ? "Male" : "Female",
-      maxWidth:"0px"
-    },
-    {
-      name: "DOB",
-      selector: (row) => row.dob.split("T")[0],
-      center: true
-    },
-    {
-      name: "Grade",
-      selector: (row) => row.grade,
-      center: true
-    }, 
-    {
-      name: "Campus",
-      selector: (row) => row.campus,
-      center: true,
-      grow:2
-    },
-    {
-      name: "Parent Name",
-      selector: (row) => row.parentGuardianName,
-      center: true,
-      grow:2
-    },
-  ];
-
-
   return (
     <>
-    Table
-      <DataTable columns={columns} data={studentTable} />
+    <Button onClick={handleMe}>clich</Button>
+    <Form.Control
+                name="secondHealthQuestion"
+                disabled
+                ref={ref}
+                required
+              />
+   
     </>
   );
 

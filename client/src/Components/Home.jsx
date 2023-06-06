@@ -16,7 +16,7 @@ import OTPInput, { ResendOTP } from "otp-input-react";
 
 const Home = () => {
   /*All states and ref */
-  const [studentTable, setStudentTable] = useState();
+  const [studentTable, setStudentTable] = useState({});
   const dataTable = useRef(null);
   const [isGettingOTP, setGettingOTP] = useState(false);
   const [isLogin, setIsLogin] = useState(false);
@@ -30,7 +30,6 @@ const Home = () => {
   const [showAlert, setShowAlert] = useState("");
 
   const boolTest = true;
-  const car = { type: "Fiat", model: "", color: "" };
 
   /*------*/
 
@@ -48,76 +47,85 @@ const Home = () => {
 
   const handleGetOtp = async () => {
     const params = refLogin.current.value;
-    await fetch("/getParent?email=" + params, {method: 'GET'})
+    await fetch("/getParent?email=" + params, { method: "GET" })
       .then((res) => res.json())
-      .then(
-        (result) => {
-          sessionStorage.setItem("OTP",result.data)
+      .then((result) => {
+        if (result.message === "Success") {
+          sessionStorage.setItem("OTP", result.data);
           setGettingOTP(true);
-        },
-        (error) => {
+        } else {
           setShowAlert("fail");
-          console.log(error);
         }
-      );
+      });
   };
 
-  const handleResendOtp = () => {
-    console.log("Resending OTP");
+  const handleResendOtp = async () => {
+    const params = sessionStorage.getItem("OTP");
+    await fetch("/ResendOTP?oldOtpCode=" + params, { method: "GET" })
+      .then((res) => res.json())
+      .then((result) => {
+        if (result.message === "Success") {
+          sessionStorage.setItem("OTP", result.data);
+          setGettingOTP(true);
+        } else {
+          setShowAlert("fail");
+        }
+      });
   };
 
   const handleLogin = async () => {
-    const params = sessionStorage.getItem('OTP');
-    //const param = "vinguyen199@gmail.com"
-      await fetch("/ValidOTP?OtpCode="+params,{method: 'GET'})
-        .then((res) => res.json())
-        .then(
-          (result) => {
-            console.log(result);
-            setGettingOTP(false);
-            setIsLogin(true);
-            sessionStorage.setItem("isLogin", true);
-            sessionStorage.setItem("loginTime", Date.now());
-            sessionStorage.setItem("student", JSON.stringify(result));
-            setStudentTable(result);
-          },
-          (error) => {
-            setShowAlert("fail");
-            console.log(error);
-          }
-        );
-    };
-  
+    const params = sessionStorage.getItem("OTP");
+    await fetch("/ValidOTP?OtpCode=" + params, { method: "GET" })
+      .then((res) => res.json())
+      .then((result) => {
+        if (result.message === "Success") {
+          console.log(result);
+          setGettingOTP(false);
+          setIsLogin(true);
+          sessionStorage.setItem("isLogin", true);
+          sessionStorage.setItem("loginTime", Date.now());
+          sessionStorage.setItem("student", JSON.stringify(result.data));
+          setStudentTable(result.data);
+        } else {
+          setShowAlert("fail");
+        }
+      });
+  };
 
   const handleSubmit = async (e) => {
-    const params = "vinguyen199@gmail.com"
-    await fetch("/Confirm?email=" + params)
+    console.log(refFirstQuestion.current);
+    console.log(refSecondQuestion.current);
+    const studentSessionStorage = sessionStorage.getItem("student");
+    const student = JSON.parse(studentSessionStorage);
+
+    if (refFirstQuestion.current != null) {
+      student[0].firstHealthQuestion = refFirstQuestion.current.value;
+    }
+    if (refSecondQuestion.current != null) {
+      student[0].secondHealthQuestion = refSecondQuestion.current.value;
+    }
+
+    await fetch("/Confirm", {
+      method: "POST",
+      headers: {
+        Accept: "application.json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(student[0]),
+      cache: "default",
+    })
       .then((res) => res.json())
-      .then(
-        (result) => {          
+      .then((result) => {
+        if (result.message === "Success") {
           console.log(result);
           setShowAlert("success");
-
-        },
-        (error) => {
+          sessionStorage.clear();
+          window.location.reload(true);
+        } else {
           setShowAlert("fail");
-          console.log(error)     
         }
-      );
-      
-    console.log(refSecondQuestion.current.value);
-    console.log(refFirstQuestion.current.value);
-    if (refFirstQuestion.current.value != null) {
-      car.model = refFirstQuestion.current.value;
-      sessionStorage.setItem("student", JSON.stringify(car));
-    }
-    if (refSecondQuestion.current.value != null) {
-      car.type = refSecondQuestion.current.value;
-      sessionStorage.setItem("student", JSON.stringify(car));
-    }
-
-    //sessionStorage.clear();
-    //window.location.reload(true);
+      })
+      .catch((err) => console.log(err));
   };
 
   /*------*/
@@ -149,7 +157,7 @@ const Home = () => {
     },
     {
       name: "DOB",
-      selector: (row) => row.dob.split("T")[0],
+      selector: (row) => row.dob,
       center: true,
     },
     {
@@ -268,8 +276,6 @@ const Home = () => {
 
   /*Api calls */
 
- 
-
   if (showAlert === "fail") {
     return (
       <center>
@@ -279,7 +285,10 @@ const Home = () => {
           dismissible
           style={{ width: "42rem" }}
         >
-          <Alert.Heading>Oh snap! You got an error! Please try again or contact admission officer</Alert.Heading>
+          <Alert.Heading>
+            Oh snap! You got an error! Please try again or contact admission
+            officer
+          </Alert.Heading>
         </Alert>
       </center>
     );
@@ -323,7 +332,7 @@ const Home = () => {
                       <Form.Control
                         ref={refLogin}
                         required={boolTest}
-                        placeholder="Please input email or phone number"
+                        placeholder="email"
                       />
                       <Button size="lg" variant="danger" onClick={handleGetOtp}>
                         Log In
@@ -388,6 +397,7 @@ const Home = () => {
               </div>
               <center>
                 <Form.Check
+                  size="lg"
                   type="checkbox"
                   onChange={() => {
                     if (readyToConfirm) {
