@@ -1,31 +1,30 @@
-import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
-import { useRef } from 'react';
+import React from "react";
+import Form from "react-bootstrap/Form";
 
-function TooltipPositionedExample() {
-  const ref = useRef(null)
-    const handleMe=() => {
-    const params = sessionStorage.getItem("student");
-    const obj = JSON.parse(params)
-    console.log(obj)
-    console.log(ref)
-    console.log(ref.current.value)
-    if (ref.current.value != null){
-      console.log("empty")
-    }
-  }
+export default function TextFields() {
+  const [values, setValues] = React.useState({
+    name: ""
+  });
+
+  const handleChange = name => event => {
+    setValues({ ...values, [name]: event.target.value });
+  };
+
+  const error = values.name !== "a";
+
   return (
-    <>
-    <Button onClick={handleMe}>clich</Button>
-    <Form.Control
-                name="secondHealthQuestion"
-                disabled
-                ref={ref}
-                required
-              />
-   
-    </>
-  );
 
-};
-export default TooltipPositionedExample;
+    <form>
+      <p>hihi</p>
+        <Form.Control
+        id="standard-name"
+        label="Name"
+        value={values.name}
+        onChange={handleChange("name")}
+        margin="normal"
+        helperText={error ? "Name needs to be 'a'" : "Perfect!"}
+        error={error}
+      />
+    </form>
+  );
+}

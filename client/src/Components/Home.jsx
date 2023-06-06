@@ -23,16 +23,24 @@ const Home = () => {
   const [otp, setOtp] = useState("");
   const refFirstQuestion = useRef(null);
   const refSecondQuestion = useRef(null);
-  const refLogin = useRef(null);
+  const refLogin = useRef('');
   const [checkedFirstQuestion, setCheckedFirstQuestion] = useState(false);
   const [checkedSecondQuestion, setCheckedSecondQuestion] = useState(false);
   const [readyToConfirm, setReadyToConfirm] = useState(false);
   const [showAlert, setShowAlert] = useState("");
-
-  const boolTest = true;
+  const [validateLogin, setValidateLogin] = useState(true);
 
   /*------*/
+  const handleValidateLogin = () => {
+    if (refLogin.current.value.includes("@")) {
+      setValidateLogin(false)
+    } else {
+      setValidateLogin(true)
+    }
+  }
 
+  const Handbook = "https://vietuc.sharepoint.com/:b:/s/VASContentSharing/ESYNnnOMCpBMuMqW03-gyk0BXV_SeUFuUUe25hzJj9MiiQ?e=m8Wf9M"
+  
   /*Button control */
   const renderButton = (buttonProps) => {
     return (
@@ -286,8 +294,7 @@ const Home = () => {
           style={{ width: "42rem" }}
         >
           <Alert.Heading>
-            Oh snap! You got an error! Please try again or contact admission
-            officer
+            Oh snap! You got an error! Please try again or contact admission officer
           </Alert.Heading>
         </Alert>
       </center>
@@ -301,7 +308,7 @@ const Home = () => {
           dismissible
           style={{ width: "42rem" }}
         >
-          <Alert.Heading>Thank you</Alert.Heading>
+          <Alert.Heading>Thank you for your confirmation</Alert.Heading>
         </Alert>
       </center>
     );
@@ -330,11 +337,12 @@ const Home = () => {
                     <InputGroup className="mb-3">
                       <InputGroup.Text>@</InputGroup.Text>
                       <Form.Control
+                        type="email"
                         ref={refLogin}
-                        required={boolTest}
                         placeholder="email"
+                        onChange={handleValidateLogin}
                       />
-                      <Button size="lg" variant="danger" onClick={handleGetOtp}>
+                      <Button size="lg" variant="danger" onClick={handleGetOtp} disabled={validateLogin} >
                         Log In
                       </Button>
                     </InputGroup>
@@ -383,6 +391,7 @@ const Home = () => {
           {isLogin && !isGettingOTP && (
             <div ref={dataTable}>
               <div className="container">
+                
                 <h3 className="text-center">Students Profiles</h3>
                 <DataTable
                   columns={columns}
@@ -408,11 +417,12 @@ const Home = () => {
                   }}
                   inline
                 />{" "}
-                I confirm I have read the handbook file carefully and take
+                I confirm I have read the <a className="text-danger" style={{fontSize:18}} href={Handbook}><strong>handbook file</strong></a> carefully and take
                 responsibilities if anything happens
                 <Button
                   className="ms-3"
-                  variant="outline-success"
+                  size="md"
+                  variant="success"
                   disabled={!readyToConfirm}
                   onClick={handleSubmit}
                 >
@@ -422,6 +432,17 @@ const Home = () => {
             </div>
           )}
         </section>
+      </div>
+      <div
+        className="container-fluid bg-danger text-center text-white m-0 py-1 d-flex flex-column justify-content-center"
+        style={{
+          position: "absolute",
+          bottom: "0",
+          width: "100%",
+          height: "4rem",
+        }}
+      >
+        <p className="m-0">&copy;Vietnam Australian School 2023</p>
       </div>
     </div>
   );
