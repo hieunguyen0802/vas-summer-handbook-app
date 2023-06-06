@@ -14,15 +14,20 @@ import DataTable from "react-data-table-component";
 import OTPInput, { ResendOTP } from "otp-input-react";
 
 const Home = () => {
-  /*All states */
+  /*All states and ref */
   const [studentTable, setStudentTable] = useState();
   const dataTable = useRef(null);
   const [isGettingOTP, setGettingOTP] = useState(false);
   const [isLogin, setIsLogin] = useState(false);
   const [otp, setOtp] = useState("");
-
-
-
+  const refFirstQuestion = useRef(null);
+  const refSecondQuestion = useRef(null);
+  const [checkedFirstQuestion, setCheckedFirstQuestion] = useState(false);
+  const [checkedSecondQuestion, setCheckedSecondQuestion] = useState(false);
+  const [readyToConfirm, setReadyToConfirm] = useState(false);
+  const boolTest = true
+  const car = {type:"Fiat", model: "" , color: "" };
+  
 
 
   /*------*/
@@ -32,13 +37,12 @@ const Home = () => {
     return (
       <Button {...buttonProps} onClick={handleResendOtp}>
         {buttonProps.remainingTime !== 0
-          ? `Please wait for ${buttonProps.remainingTime} sec`
+          ? `Please wait for ${buttonProps.remainingTime} sec to resend`
           : "Resend"}
       </Button>
     );
   };
   const renderTime = () => React.Fragment;
-
 
   const handleGetOtp = () => {
     setGettingOTP(true);
@@ -53,14 +57,37 @@ const Home = () => {
     setIsLogin(true);
     sessionStorage.setItem("isLogin", true);
     sessionStorage.setItem("loginTime", Date.now());
+    sessionStorage.setItem("student", JSON.stringify(car));
+  };
+
+  const handleSubmit = (e) => {
+    
+    console.log(refSecondQuestion.current.value);
+    console.log(refFirstQuestion.current.value);
+    if (refFirstQuestion.current.value != null) {
+      car.model = refFirstQuestion.current.value;
+      sessionStorage.setItem("student", JSON.stringify(car))
+    }
+    if (refSecondQuestion.current.value != null) {
+      car.type = refSecondQuestion.current.value;
+      sessionStorage.setItem("student", JSON.stringify(car))
+    }
+    
+    //sessionStorage.clear();
+    //window.location.reload(true);
   };
 
   /*------*/
 
-
   /*Data table */
-  const handleChange = ({ selectedRows }) => {
-    console.log("Selected Rows: ", selectedRows);
+  const handleSelectRow = (selectedRows) => {
+    if (Object.entries(selectedRows)[0][1] === true){
+      setReadyToConfirm(true);
+    } else {
+      setReadyToConfirm(false);
+    }
+
+    console.log("Selected Rows: ", Object.entries(selectedRows)[0]);
   };
   const columns = [
     {
@@ -89,7 +116,7 @@ const Home = () => {
             </i>
           </h5>
           <hr />
-          <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+          <Form.Group className="mb-3" controlId="exampleForm.ControlInput">
             <p>
               Học sinh có tiền sửa bệnh tật/ dị ứng nào mà có thể nguy hiểm tới
               sức khỏe không ? (Ví dụ: dị ứng nghiêm trọng với thuốc, nọc của
@@ -107,8 +134,17 @@ const Home = () => {
               </i>
             </p>
             <InputGroup className="mb-3">
-              <InputGroup.Checkbox />
-              <Form.Control />
+              <InputGroup.Checkbox
+                checked={checkedFirstQuestion}
+                onChange={() => {
+                  setCheckedFirstQuestion(!checkedFirstQuestion);
+                }}
+              />
+              <Form.Control
+                name="firstHealthQuestion"
+                disabled={!checkedFirstQuestion}
+                ref={refFirstQuestion}
+              />
             </InputGroup>
             <hr />
             <Form.Text>
@@ -143,8 +179,19 @@ const Home = () => {
               <i style={{ color: "blue" }}>If yes, please explain</i>{" "}
             </p>
             <InputGroup className="mb-3">
-              <InputGroup.Checkbox aria-label="Checkbox for following text input" />
-              <Form.Control aria-label="Text input with checkbox" />
+              <InputGroup.Checkbox
+                checked={checkedSecondQuestion}
+                onChange={() => {
+                  setCheckedSecondQuestion(!checkedSecondQuestion);
+                }}
+              />
+              <Form.Control
+
+                name="secondHealthQuestion"
+                disabled={!checkedSecondQuestion}
+                ref={refSecondQuestion}
+                required
+              />
             </InputGroup>
           </Form.Group>
           <hr />
@@ -161,7 +208,7 @@ const Home = () => {
     ).then((response) => response.json());
 
     // update the state
-    setStudentTable(response.slice(0, 2));
+    setStudentTable(response.slice(0, 1));
   };
 
   useEffect(() => {
@@ -189,7 +236,7 @@ const Home = () => {
                   <Col md="8">
                     <InputGroup className="mb-3">
                       <InputGroup.Text>@</InputGroup.Text>
-                      <Form.Control placeholder="email" />
+                      <Form.Control required={boolTest} placeholder="Please input email or phone number" />
                       <Button size="lg" variant="danger" onClick={handleGetOtp}>
                         Log In
                       </Button>
@@ -236,7 +283,7 @@ const Home = () => {
         {/* Student Profile - Data Table and confirm*/}
 
         <section>
-          <form>
+          
             {isLogin && !isGettingOTP && (
               <div ref={dataTable}>
                 <div className="container">
@@ -249,15 +296,19 @@ const Home = () => {
                     selectableRows
                     responsive
                     highlightOnHover
-                    onSelectedRowsChange={handleChange}
+                    onSelectedRowsChange={handleSelectRow}
                   />
                 </div>
                 <center>
-                  <Button variant="success">Confirm</Button>
+                  {readyToConfirm && <Button
+                    variant="success"
+                    onClick={handleSubmit}
+                  >
+                    Confirm
+                  </Button>}
                 </center>
               </div>
             )}
-          </form>
         </section>
       </div>
     </div>
