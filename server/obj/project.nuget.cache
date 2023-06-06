@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "xwrDzz3EzqcK6Clh2gkbtO7AF9Z1y9CAqJALKkP1AD1qkImrVvQAL66N3gDaiavk8Xfz3SlAWBnUZplyjj/HYg==",
+  "dgSpecHash": "VwCPacWgYZ6JKZZSvu4bwq71kU2/bqRa3BJvBwjnhghalWlpDg1Ue6YUxUXrcsDoe0MoEukVjwwDX9oRRdh+ng==",
   "success": true,
-  "projectFilePath": "H:\\Documents\\SelfStudy\\React\\Starter Templates\\summer-handbook-app\\server\\SummerHandBookApi.csproj",
+  "projectFilePath": "H:\\Documents\\SelfStudy\\React\\Starter Templates\\summer-handbook-app\\server\\SummerHandbookApi.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\hieu.trung.nguyen2\\.nuget\\packages\\automapper\\12.0.1\\automapper.12.0.1.nupkg.sha512",
     "C:\\Users\\hieu.trung.nguyen2\\.nuget\\packages\\automapper.extensions.microsoft.dependencyinjection\\12.0.0\\automapper.extensions.microsoft.dependencyinjection.12.0.0.nupkg.sha512",
@@ -60,6 +60,7 @@
     "C:\\Users\\hieu.trung.nguyen2\\.nuget\\packages\\mono.texttemplating\\2.2.1\\mono.texttemplating.2.2.1.nupkg.sha512",
     "C:\\Users\\hieu.trung.nguyen2\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512",
     "C:\\Users\\hieu.trung.nguyen2\\.nuget\\packages\\newtonsoft.json.bson\\1.0.2\\newtonsoft.json.bson.1.0.2.nupkg.sha512",
+    "C:\\Users\\hieu.trung.nguyen2\\.nuget\\packages\\restsharp\\110.2.0\\restsharp.110.2.0.nupkg.sha512",
     "C:\\Users\\hieu.trung.nguyen2\\.nuget\\packages\\runtime.linux-arm.runtime.native.system.io.ports\\7.0.0\\runtime.linux-arm.runtime.native.system.io.ports.7.0.0.nupkg.sha512",
     "C:\\Users\\hieu.trung.nguyen2\\.nuget\\packages\\runtime.linux-arm64.runtime.native.system.io.ports\\7.0.0\\runtime.linux-arm64.runtime.native.system.io.ports.7.0.0.nupkg.sha512",
     "C:\\Users\\hieu.trung.nguyen2\\.nuget\\packages\\runtime.linux-x64.runtime.native.system.io.ports\\7.0.0\\runtime.linux-x64.runtime.native.system.io.ports.7.0.0.nupkg.sha512",

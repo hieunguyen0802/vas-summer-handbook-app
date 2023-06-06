@@ -1,15 +1,15 @@
 {
   "format": 1,
   "restore": {
-    "H:\\Documents\\SelfStudy\\React\\Starter Templates\\summer-handbook-app\\server\\SummerHandBookApi.csproj": {}
+    "H:\\Documents\\SelfStudy\\React\\Starter Templates\\summer-handbook-app\\server\\SummerHandbookApi.csproj": {}
   },
   "projects": {
-    "H:\\Documents\\SelfStudy\\React\\Starter Templates\\summer-handbook-app\\server\\SummerHandBookApi.csproj": {
+    "H:\\Documents\\SelfStudy\\React\\Starter Templates\\summer-handbook-app\\server\\SummerHandbookApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "H:\\Documents\\SelfStudy\\React\\Starter Templates\\summer-handbook-app\\server\\SummerHandBookApi.csproj",
-        "projectName": "SummerHandBookApi",
-        "projectPath": "H:\\Documents\\SelfStudy\\React\\Starter Templates\\summer-handbook-app\\server\\SummerHandBookApi.csproj",
+        "projectUniqueName": "H:\\Documents\\SelfStudy\\React\\Starter Templates\\summer-handbook-app\\server\\SummerHandbookApi.csproj",
+        "projectName": "SummerHandbookApi",
+        "projectPath": "H:\\Documents\\SelfStudy\\React\\Starter Templates\\summer-handbook-app\\server\\SummerHandbookApi.csproj",
         "packagesPath": "C:\\Users\\hieu.trung.nguyen2\\.nuget\\packages\\",
         "outputPath": "H:\\Documents\\SelfStudy\\React\\Starter Templates\\summer-handbook-app\\server\\obj\\",
         "projectStyle": "PackageReference",
@@ -91,6 +91,10 @@
             "Newtonsoft.Json": {
               "target": "Package",
               "version": "[13.0.3, )"
+            },
+            "RestSharp": {
+              "target": "Package",
+              "version": "[110.2.0, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",

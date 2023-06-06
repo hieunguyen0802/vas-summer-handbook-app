@@ -1001,6 +1001,22 @@
           }
         }
       },
+      "RestSharp/110.2.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Text.Json": "7.0.2"
+        },
+        "compile": {
+          "lib/net7.0/RestSharp.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net7.0/RestSharp.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "runtime.linux-arm.runtime.native.System.IO.Ports/7.0.0": {
         "type": "package",
         "runtimeTargets": {
@@ -4008,6 +4024,26 @@
         "newtonsoft.json.bson.nuspec"
       ]
     },
+    "RestSharp/110.2.0": {
+      "sha512": "FXGw0IMcqY7yO/hzS9QrD3iNswNgb9UxJnxWmfOxmGs4kRlZWqdtBoGPLuhlbgsDzX1RFo4WKui8TGGKXWKalw==",
+      "type": "package",
+      "path": "restsharp/110.2.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net471/RestSharp.dll",
+        "lib/net471/RestSharp.xml",
+        "lib/net6.0/RestSharp.dll",
+        "lib/net6.0/RestSharp.xml",
+        "lib/net7.0/RestSharp.dll",
+        "lib/net7.0/RestSharp.xml",
+        "lib/netstandard2.0/RestSharp.dll",
+        "lib/netstandard2.0/RestSharp.xml",
+        "restsharp.110.2.0.nupkg.sha512",
+        "restsharp.nuspec",
+        "restsharp.png"
+      ]
+    },
     "runtime.linux-arm.runtime.native.System.IO.Ports/7.0.0": {
       "sha512": "CBvgRaF+M0xGLDv2Geb/0v0LEADheH8aK72GRAUJdnqnJVsQO60ki1XO8M3keEhnjm+T5NvLm41pNXAVYAPiSg==",
       "type": "package",
@@ -6913,6 +6949,7 @@
       "Microsoft.Extensions.DependencyInjection >= 7.0.0",
       "Microsoft.Windows.Compatibility >= 7.0.1",
       "Newtonsoft.Json >= 13.0.3",
+      "RestSharp >= 110.2.0",
       "Swashbuckle.AspNetCore >= 6.4.0",
       "System.DirectoryServices >= 7.0.1",
       "System.DirectoryServices.AccountManagement >= 7.0.0",
@@ -6927,9 +6964,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "H:\\Documents\\SelfStudy\\React\\Starter Templates\\summer-handbook-app\\server\\SummerHandBookApi.csproj",
-      "projectName": "SummerHandBookApi",
-      "projectPath": "H:\\Documents\\SelfStudy\\React\\Starter Templates\\summer-handbook-app\\server\\SummerHandBookApi.csproj",
+      "projectUniqueName": "H:\\Documents\\SelfStudy\\React\\Starter Templates\\summer-handbook-app\\server\\SummerHandbookApi.csproj",
+      "projectName": "SummerHandbookApi",
+      "projectPath": "H:\\Documents\\SelfStudy\\React\\Starter Templates\\summer-handbook-app\\server\\SummerHandbookApi.csproj",
       "packagesPath": "C:\\Users\\hieu.trung.nguyen2\\.nuget\\packages\\",
       "outputPath": "H:\\Documents\\SelfStudy\\React\\Starter Templates\\summer-handbook-app\\server\\obj\\",
       "projectStyle": "PackageReference",
@@ -7011,6 +7048,10 @@
           "Newtonsoft.Json": {
             "target": "Package",
             "version": "[13.0.3, )"
+          },
+          "RestSharp": {
+            "target": "Package",
+            "version": "[110.2.0, )"
           },
           "Swashbuckle.AspNetCore": {
             "target": "Package",

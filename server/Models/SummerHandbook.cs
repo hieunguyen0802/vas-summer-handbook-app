@@ -23,10 +23,11 @@ namespace SummerHandbookApi.Models
         public string emailFromParent { get; set; }
         public string phoneFromParent { get; set; }
         public string parentGuardianName { get; set; }
-      
+        public string firstHealthQuestion { get; set; }
+        public string secondHealthQuestion { get; set; }
         public string verify_code{get; set; }
-        public DateTime createdOn {get; set; }
-        public DateTime updatedOn {get; set; }
+        public DateTime? createdOn {get; set; }
+        public DateTime? updatedOn {get; set; }
         public DateTime? parentGuardianConfirmDate { get; set; }
         public string isConfirm { get; set; }
     }

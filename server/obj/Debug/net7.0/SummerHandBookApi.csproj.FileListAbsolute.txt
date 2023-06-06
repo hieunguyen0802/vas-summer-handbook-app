@@ -177,3 +177,4 @@ H:\Documents\SelfStudy\React\Starter Templates\summer-handbook-app\server\obj\De
 H:\Documents\SelfStudy\React\Starter Templates\summer-handbook-app\server\bin\Debug\net7.0\BouncyCastle.Cryptography.dll
 H:\Documents\SelfStudy\React\Starter Templates\summer-handbook-app\server\bin\Debug\net7.0\MailKit.dll
 H:\Documents\SelfStudy\React\Starter Templates\summer-handbook-app\server\bin\Debug\net7.0\MimeKit.dll
+H:\Documents\SelfStudy\React\Starter Templates\summer-handbook-app\server\bin\Debug\net7.0\RestSharp.dll

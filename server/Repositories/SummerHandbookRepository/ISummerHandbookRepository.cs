@@ -12,7 +12,8 @@ namespace SummerHandbookApi.Repositories.SummerHandbookRepository
         Task<List<SummerHandbook>> validParent(string email);
         Task<SummerHandbook> getParentInfo(string email);
         Task insertParentCode(SummerHandbook model);
-        Task<SummerHandbook> validOtpCode (string OtpCode);
+        Task<List<SummerHandbook>> validOtpCode (string OtpCode);
         Task<bool> UpdateSummerHandbook(SummerHandbook form);
+        Task<List<SummerHandbook>> getAll();
     }
 }

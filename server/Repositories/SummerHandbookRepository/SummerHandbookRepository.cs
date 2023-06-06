@@ -34,8 +34,8 @@ namespace SummerHandbookApi.Repositories.SummerHandbookRepository
             await _SummerHandbookDbContext.SaveChangesAsync();
         }
 
-        public async Task<SummerHandbook> validOtpCode (string OtpCode) {
-            var student = await _SummerHandbookDbContext.summerHandbook.Where(c => c.verify_code == OtpCode).FirstOrDefaultAsync();
+        public async Task<List<SummerHandbook>> validOtpCode (string OtpCode) {
+            var student = await _SummerHandbookDbContext.summerHandbook.Where(c => c.verify_code == OtpCode).ToListAsync();
             return student;
         }
 
@@ -50,6 +50,10 @@ namespace SummerHandbookApi.Repositories.SummerHandbookRepository
             _SummerHandbookDbContext.summerHandbook.Update(form);
             await _SummerHandbookDbContext.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<List<SummerHandbook>> getAll (){
+            return await _SummerHandbookDbContext.summerHandbook.AsQueryable().ToListAsync();
         }
 
 
