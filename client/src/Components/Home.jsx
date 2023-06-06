@@ -8,8 +8,9 @@ import Button from "react-bootstrap/Button";
 import Col from "react-bootstrap/Col";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import DataTable from "react-data-table-component";
+import Alert from "react-bootstrap/Alert";
 
 import OTPInput, { ResendOTP } from "otp-input-react";
 
@@ -22,13 +23,14 @@ const Home = () => {
   const [otp, setOtp] = useState("");
   const refFirstQuestion = useRef(null);
   const refSecondQuestion = useRef(null);
+  const refLogin = useRef(null);
   const [checkedFirstQuestion, setCheckedFirstQuestion] = useState(false);
   const [checkedSecondQuestion, setCheckedSecondQuestion] = useState(false);
   const [readyToConfirm, setReadyToConfirm] = useState(false);
-  const boolTest = true
-  const car = {type:"Fiat", model: "" , color: "" };
-  
+  const [showAlert, setShowAlert] = useState("");
 
+  const boolTest = true;
+  const car = { type: "Fiat", model: "", color: "" };
 
   /*------*/
 
@@ -44,35 +46,76 @@ const Home = () => {
   };
   const renderTime = () => React.Fragment;
 
-  const handleGetOtp = () => {
-    setGettingOTP(true);
+  const handleGetOtp = async () => {
+    const params = refLogin.current.value;
+    await fetch("/getParent?email=" + params, {method: 'GET'})
+      .then((res) => res.json())
+      .then(
+        (result) => {
+          sessionStorage.setItem("OTP",result.data)
+          setGettingOTP(true);
+        },
+        (error) => {
+          setShowAlert("fail");
+          console.log(error);
+        }
+      );
   };
 
   const handleResendOtp = () => {
     console.log("Resending OTP");
   };
 
-  const handleLogin = () => {
-    setGettingOTP(false);
-    setIsLogin(true);
-    sessionStorage.setItem("isLogin", true);
-    sessionStorage.setItem("loginTime", Date.now());
-    sessionStorage.setItem("student", JSON.stringify(car));
-  };
+  const handleLogin = async () => {
+    const params = sessionStorage.getItem('OTP');
+    //const param = "vinguyen199@gmail.com"
+      await fetch("/ValidOTP?OtpCode="+params,{method: 'GET'})
+        .then((res) => res.json())
+        .then(
+          (result) => {
+            console.log(result);
+            setGettingOTP(false);
+            setIsLogin(true);
+            sessionStorage.setItem("isLogin", true);
+            sessionStorage.setItem("loginTime", Date.now());
+            sessionStorage.setItem("student", JSON.stringify(result));
+            setStudentTable(result);
+          },
+          (error) => {
+            setShowAlert("fail");
+            console.log(error);
+          }
+        );
+    };
+  
 
-  const handleSubmit = (e) => {
-    
+  const handleSubmit = async (e) => {
+    const params = "vinguyen199@gmail.com"
+    await fetch("/Confirm?email=" + params)
+      .then((res) => res.json())
+      .then(
+        (result) => {          
+          console.log(result);
+          setShowAlert("success");
+
+        },
+        (error) => {
+          setShowAlert("fail");
+          console.log(error)     
+        }
+      );
+      
     console.log(refSecondQuestion.current.value);
     console.log(refFirstQuestion.current.value);
     if (refFirstQuestion.current.value != null) {
       car.model = refFirstQuestion.current.value;
-      sessionStorage.setItem("student", JSON.stringify(car))
+      sessionStorage.setItem("student", JSON.stringify(car));
     }
     if (refSecondQuestion.current.value != null) {
       car.type = refSecondQuestion.current.value;
-      sessionStorage.setItem("student", JSON.stringify(car))
+      sessionStorage.setItem("student", JSON.stringify(car));
     }
-    
+
     //sessionStorage.clear();
     //window.location.reload(true);
   };
@@ -80,35 +123,58 @@ const Home = () => {
   /*------*/
 
   /*Data table */
-  const handleSelectRow = (selectedRows) => {
-    if (Object.entries(selectedRows)[0][1] === true){
+  /*   const handleSelectRow = (selectedRows) => {
+    if (Object.entries(selectedRows)[0][1] === true) {
       setReadyToConfirm(true);
     } else {
       setReadyToConfirm(false);
     }
 
     console.log("Selected Rows: ", Object.entries(selectedRows)[0]);
-  };
+  }; */
+
   const columns = [
     {
-      name: "Title",
-      selector: (row) => row.title,
-      sortable: true,
+      name: "Student Code",
+      selector: (row) => row.studentCode,
     },
     {
-      name: "Id",
-      selector: (row) => row.userId,
+      name: "Student Name",
+      selector: (row) => row.studentName,
     },
     {
-      name: "Year",
-      selector: (row) => row.id,
+      name: "Gender",
+      selector: (row) => (row.gender === "M" ? "Male" : "Female"),
+      maxWidth: "0px",
+    },
+    {
+      name: "DOB",
+      selector: (row) => row.dob.split("T")[0],
+      center: true,
+    },
+    {
+      name: "Grade",
+      selector: (row) => row.grade,
+      center: true,
+    },
+    {
+      name: "Campus",
+      selector: (row) => row.campus,
+      center: true,
+      grow: 2,
+    },
+    {
+      name: "Parent Name",
+      selector: (row) => row.parentGuardianName,
+      center: true,
+      grow: 2,
     },
   ];
 
   const expandableRowsComponent = () => {
     return (
       <>
-        <Form className="m-3 p-3">
+        <section className="m-3 p-3">
           <h5 className="text-center">
             Thông Tin Về Sức Khỏe Để Tham Gia Chương Trình Trại Hè VAS 2023 /{" "}
             <i style={{ color: "blue" }}>
@@ -186,7 +252,6 @@ const Home = () => {
                 }}
               />
               <Form.Control
-
                 name="secondHealthQuestion"
                 disabled={!checkedSecondQuestion}
                 ref={refSecondQuestion}
@@ -195,25 +260,44 @@ const Home = () => {
             </InputGroup>
           </Form.Group>
           <hr />
-        </Form>
+        </section>
       </>
     );
   };
   /*------*/
 
   /*Api calls */
-  const getApiData = async () => {
-    const response = await fetch(
-      "https://jsonplaceholder.typicode.com/todos/"
-    ).then((response) => response.json());
 
-    // update the state
-    setStudentTable(response.slice(0, 1));
-  };
+ 
 
-  useEffect(() => {
-    getApiData();
-  }, []);
+  if (showAlert === "fail") {
+    return (
+      <center>
+        <Alert
+          variant="danger"
+          onClose={() => setShowAlert("")}
+          dismissible
+          style={{ width: "42rem" }}
+        >
+          <Alert.Heading>Oh snap! You got an error! Please try again or contact admission officer</Alert.Heading>
+        </Alert>
+      </center>
+    );
+  } else if (showAlert === "success") {
+    return (
+      <center>
+        <Alert
+          variant="success"
+          onClose={() => setShowAlert("")}
+          dismissible
+          style={{ width: "42rem" }}
+        >
+          <Alert.Heading>Thank you</Alert.Heading>
+        </Alert>
+      </center>
+    );
+  }
+
   /*------*/
 
   return (
@@ -236,7 +320,11 @@ const Home = () => {
                   <Col md="8">
                     <InputGroup className="mb-3">
                       <InputGroup.Text>@</InputGroup.Text>
-                      <Form.Control required={boolTest} placeholder="Please input email or phone number" />
+                      <Form.Control
+                        ref={refLogin}
+                        required={boolTest}
+                        placeholder="Please input email or phone number"
+                      />
                       <Button size="lg" variant="danger" onClick={handleGetOtp}>
                         Log In
                       </Button>
@@ -283,32 +371,46 @@ const Home = () => {
         {/* Student Profile - Data Table and confirm*/}
 
         <section>
-          
-            {isLogin && !isGettingOTP && (
-              <div ref={dataTable}>
-                <div className="container">
-                  <h3 className="text-center">Students Profiles</h3>
-                  <DataTable
-                    columns={columns}
-                    data={studentTable}
-                    expandableRows
-                    expandableRowsComponent={expandableRowsComponent}
-                    selectableRows
-                    responsive
-                    highlightOnHover
-                    onSelectedRowsChange={handleSelectRow}
-                  />
-                </div>
-                <center>
-                  {readyToConfirm && <Button
-                    variant="success"
-                    onClick={handleSubmit}
-                  >
-                    Confirm
-                  </Button>}
-                </center>
+          {isLogin && !isGettingOTP && (
+            <div ref={dataTable}>
+              <div className="container">
+                <h3 className="text-center">Students Profiles</h3>
+                <DataTable
+                  columns={columns}
+                  data={studentTable}
+                  expandableRows
+                  expandableRowsComponent={expandableRowsComponent}
+                  responsive
+                  highlightOnHover
+                  /* selectableRows
+                    onSelectedRowsChange={handleSelectRow} */
+                />
               </div>
-            )}
+              <center>
+                <Form.Check
+                  type="checkbox"
+                  onChange={() => {
+                    if (readyToConfirm) {
+                      setReadyToConfirm(false);
+                    } else {
+                      setReadyToConfirm(true);
+                    }
+                  }}
+                  inline
+                />{" "}
+                I confirm I have read the handbook file carefully and take
+                responsibilities if anything happens
+                <Button
+                  className="ms-3"
+                  variant="outline-success"
+                  disabled={!readyToConfirm}
+                  onClick={handleSubmit}
+                >
+                  Confirm
+                </Button>
+              </center>
+            </div>
+          )}
         </section>
       </div>
     </div>
