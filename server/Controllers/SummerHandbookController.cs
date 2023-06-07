@@ -11,6 +11,7 @@ using MimeKit.Text;
 using RestSharp;
 using SummerHandbookApi.Models;
 using SummerHandbookApi.Repositories.SummerHandbookRepository;
+using AutoMapper;
 
 namespace SummerHandbookApi.Controllers
 {
@@ -19,16 +20,21 @@ namespace SummerHandbookApi.Controllers
     public class SummerHandbookController : ControllerBase
     {
         private readonly ISummerHandbookRepository _summerHandbookRepository;
-        public SummerHandbookController(ISummerHandbookRepository summerHandbookRepository)
+        private readonly IMapper _mapper;
+
+        public SummerHandbookController(ISummerHandbookRepository summerHandbookRepository, IMapper mapper)
         {
             _summerHandbookRepository = summerHandbookRepository;
+            _mapper = mapper;
         }
 
         [HttpGet]
-        public async Task<IActionResult> getTestTable(string email){
+        public async Task<IActionResult> getTestTable(string email)
+        {
             if (email != null)
             {
-                return Ok(await _summerHandbookRepository.validParent(email));
+                var parent = await _summerHandbookRepository.getParentInfoByEmail(email);
+                return Ok(await _summerHandbookRepository.validOtpCode(parent.verify_code));
             }
             return BadRequest("error");
         }
@@ -39,33 +45,46 @@ namespace SummerHandbookApi.Controllers
             try
             {
                 var parent = await _summerHandbookRepository.validParent(email);
-                if (parent == null) return NotFound(new { message = "Fail", info = "Email hoặc số điện thoại không tồn tại trong hệ thống. Quý phụ huynh vui lòng thử lại! - Your credentials is not valid, please check back" });
+                if (parent.FirstOrDefault() == null) return NotFound(new { message = "Fail", info = "Email hoặc số điện thoại không tồn tại trong hệ thống. Quý phụ huynh vui lòng thử lại! - Your credentials is not valid, please check back" });
                 Random generator = new Random();
                 String code = generator.Next(0, 1000000).ToString("D6");
-                var isExistParent = await _summerHandbookRepository.getParentInfo(parent.FirstOrDefault().emailFromParent);
+
+                var isExistParent = await _summerHandbookRepository.getParentInfoByEmail(parent.FirstOrDefault().emailFromParent);
                 if (isExistParent != null)
                 {
                     isExistParent.verify_code = code;
                     isExistParent.updatedOn = DateTime.Now;
-                    await _summerHandbookRepository.UpdateSummerHandbook(isExistParent);
+                    await _summerHandbookRepository.UpdateParent(isExistParent);
                     SendEmail(isExistParent);
-                    //sendSMSAsync(isExistParent);             
                 }
                 else
-                {   
-                    var getAll = await _summerHandbookRepository.getAll();
-                    var id = getAll.Count() + 1;
-                    parent.FirstOrDefault().Id = id;
-                    parent.FirstOrDefault().verify_code = code;
-                    parent.FirstOrDefault().updatedOn = DateTime.Now;
-                    parent.FirstOrDefault().createdOn = DateTime.Now;
-                    await _summerHandbookRepository.insertParentCode(parent.FirstOrDefault());
-                    SendEmail(parent.FirstOrDefault());
-                    //sendSMSAsync(isExistParent);    
-                }
-                return Ok(new { message = "Success", data = code });
+                {
+                    var parentMapper = _mapper.Map<SummerHandbook, Parent>(parent.FirstOrDefault());
+                    var allParent = await _summerHandbookRepository.getAllParent();
+                    parentMapper.Id = allParent.Count() + 1;
+                    parentMapper.verify_code = code;
+                    parentMapper.createdOn = DateTime.Now;
+                    parentMapper.updatedOn = DateTime.Now;
+                    await _summerHandbookRepository.insertParent(parentMapper);
 
+                    foreach (var item in parent)
+                    {
+                        var studentMapper = _mapper.Map<SummerHandbook, Student>(item);
+                        var allStudent = await _summerHandbookRepository.getAllStudent();
+                        //student
+                        studentMapper.Id = allStudent.Count() + 1;
+                        studentMapper.createdOn = DateTime.Now;
+                        studentMapper.updatedOn = DateTime.Now;
+                        studentMapper.parentId = parentMapper.Id;
+                        await _summerHandbookRepository.insertStudent(studentMapper);
+                    }
+                    SendEmail(parentMapper);
+                }
+                //sendSMSAsync(isExistParent);    
+                return Ok(new { message = "Success", data = code });
             }
+
+
             catch (System.Exception e)
             {
                 System.Console.WriteLine(e.Message);
@@ -77,21 +96,29 @@ namespace SummerHandbookApi.Controllers
         {
             if (OtpCode != null)
             {
-                return Ok(new { message = "Success", data = await _summerHandbookRepository.validOtpCode(OtpCode)});
+                return Ok(new { message = "Success", data = await _summerHandbookRepository.validOtpCode(OtpCode) });
             }
             return BadRequest(new { message = "Fail", info = "Invalid OTP Code" });
         }
 
         [HttpPost]
-        public async Task<IActionResult> Confirm(SummerHandbook form)
+        public async Task<IActionResult> Confirm([FromBody] List<Student> form)
         {
             if (form == null)
             {
                 return BadRequest(new { message = "Fail", info = "Error occured, please try again or contact admission for more information" });
             }
-            form.isConfirm = "true";
-            form.parentGuardianConfirmDate = DateTime.Now;
-            return Ok(new { message = "Success", data = await _summerHandbookRepository.UpdateSummerHandbook(form) });
+            var parent = await _summerHandbookRepository.getParentInfoById(form.FirstOrDefault().parentId);
+            parent.isConfirm = "true";
+            parent.parentGuardianConfirmDate = DateTime.Now;    
+            await _summerHandbookRepository.UpdateParent(parent);
+
+            foreach (var item in form)
+                {
+                    await _summerHandbookRepository.updateStudent(item);
+                }
+        
+            return Ok(new { message = "Success"});
         }
 
         [HttpGet]
@@ -100,17 +127,17 @@ namespace SummerHandbookApi.Controllers
             try
 
             {
-                var isValid = await _summerHandbookRepository.validOtpCode(oldOtpCode);
+                var isValid = await _summerHandbookRepository.validOtpFromParent(oldOtpCode);
                 Random generator = new Random();
                 String code = generator.Next(0, 1000000).ToString("D6");
-                isValid.FirstOrDefault().verify_code = code;
-                isValid.FirstOrDefault().updatedOn = DateTime.Now;
-                await _summerHandbookRepository.UpdateSummerHandbook(isValid.FirstOrDefault());
-                SendEmail(isValid.FirstOrDefault());
+                isValid.verify_code= code;
+                isValid.updatedOn = DateTime.Now;
+                await _summerHandbookRepository.UpdateParent(isValid);
+                SendEmail(isValid);
                 return Ok(new { message = "Success", newOTP = code });
             }
             catch (System.Exception e)
-            {   
+            {
                 System.Console.WriteLine(e.Message);
                 return BadRequest("Error");
             }
@@ -118,7 +145,7 @@ namespace SummerHandbookApi.Controllers
         }
 
         #region support methods
-        private bool SendEmail(SummerHandbook form)
+        private bool SendEmail(Parent form)
         {
             try
             {
@@ -127,7 +154,7 @@ namespace SummerHandbookApi.Controllers
                 email.From.Add(MailboxAddress.Parse("webmaster@vas.edu.vn"));
                 email.To.Add(MailboxAddress.Parse("hieu.trung.nguyen2@vas.edu.vn"));
                 email.Subject = "[VAS - Automatic Email] Your OTP Code for Summer Handbook Confirmation";
-                email.Body = new TextPart(TextFormat.Html) { Text = "<h3>Your OTP Code is <font color=red><b>" + form.verify_code + "</b></font>  </h3>" };
+                email.Body = new TextPart(TextFormat.Html) { Text = "<h3>Your OTP Code is <font color=red><b>" + form.verify_code + "</b></font>. Please do not share with anyone. Shall you need more information please contact our admission team. Thank you ! </h3>" };
 
                 // send email
                 using var smtp = new SmtpClient();
@@ -143,7 +170,7 @@ namespace SummerHandbookApi.Controllers
                 return false;
             }
         }
-        private bool sendSMSAsync(SummerHandbook form)
+        private bool sendSMSAsync(Parent form)
         {
             try
             {
@@ -169,7 +196,7 @@ namespace SummerHandbookApi.Controllers
             }
 
         }
-#endregion 
+        #endregion
 
     }
 }
