@@ -11,6 +11,7 @@ import Row from "react-bootstrap/Row";
 import { useState, useRef } from "react";
 import DataTable from "react-data-table-component";
 import Alert from "react-bootstrap/Alert";
+import Card from "react-bootstrap/Card";
 
 import OTPInput, { ResendOTP } from "otp-input-react";
 
@@ -23,24 +24,26 @@ const Home = () => {
   const [otp, setOtp] = useState("");
   const refFirstQuestion = useRef(null);
   const refSecondQuestion = useRef(null);
-  const refLogin = useRef('');
+  const refLogin = useRef("");
   const [checkedFirstQuestion, setCheckedFirstQuestion] = useState(false);
   const [checkedSecondQuestion, setCheckedSecondQuestion] = useState(false);
   const [readyToConfirm, setReadyToConfirm] = useState(false);
   const [showAlert, setShowAlert] = useState("");
   const [validateLogin, setValidateLogin] = useState(true);
+  const [firstHealthQuestion, setFirstHealthQuestion] = useState("");
+  const [secondHealthQuestion, setSecondHealthQuestion] = useState("");
 
   /*------*/
   const handleValidateLogin = () => {
     if (refLogin.current.value.includes("@")) {
-      setValidateLogin(false)
+      setValidateLogin(false);
     } else {
-      setValidateLogin(true)
+      setValidateLogin(true);
     }
-  }
+  };
+  const Handbook =
+    "https://vietuc.sharepoint.com/:b:/s/VASContentSharing/ESYNnnOMCpBMuMqW03-gyk0BXV_SeUFuUUe25hzJj9MiiQ?e=m8Wf9M";
 
-  const Handbook = "https://vietuc.sharepoint.com/:b:/s/VASContentSharing/ESYNnnOMCpBMuMqW03-gyk0BXV_SeUFuUUe25hzJj9MiiQ?e=m8Wf9M"
-  
   /*Button control */
   const renderButton = (buttonProps) => {
     return (
@@ -73,7 +76,7 @@ const Home = () => {
       .then((res) => res.json())
       .then((result) => {
         if (result.message === "Success") {
-          sessionStorage.setItem("OTP", result.data);
+          sessionStorage.setItem("OTP", result.newOTP);
           setGettingOTP(true);
         } else {
           setShowAlert("fail");
@@ -87,7 +90,10 @@ const Home = () => {
       .then((res) => res.json())
       .then((result) => {
         if (result.message === "Success") {
-          console.log(result);
+          console.log(result.data[0].studentName)
+          console.log(result.data[0].firstHealthQuestion);
+          setFirstHealthQuestion(result.data[0].firstHealthQuestion);
+          setSecondHealthQuestion(result.data[0].secondHealthQuestion);
           setGettingOTP(false);
           setIsLogin(true);
           sessionStorage.setItem("isLogin", true);
@@ -101,17 +107,9 @@ const Home = () => {
   };
 
   const handleSubmit = async (e) => {
-    console.log(refFirstQuestion.current);
-    console.log(refSecondQuestion.current);
+    
     const studentSessionStorage = sessionStorage.getItem("student");
     const student = JSON.parse(studentSessionStorage);
-
-    if (refFirstQuestion.current != null) {
-      student[0].firstHealthQuestion = refFirstQuestion.current.value;
-    }
-    if (refSecondQuestion.current != null) {
-      student[0].secondHealthQuestion = refSecondQuestion.current.value;
-    }
 
     await fetch("/Confirm", {
       method: "POST",
@@ -119,7 +117,7 @@ const Home = () => {
         Accept: "application.json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(student[0]),
+      body: JSON.stringify(student),
       cache: "default",
     })
       .then((res) => res.json())
@@ -139,7 +137,7 @@ const Home = () => {
   /*------*/
 
   /*Data table */
-  /*   const handleSelectRow = (selectedRows) => {
+  /* const handleSelectRow = (selectedRows) => {
     if (Object.entries(selectedRows)[0][1] === true) {
       setReadyToConfirm(true);
     } else {
@@ -147,7 +145,7 @@ const Home = () => {
     }
 
     console.log("Selected Rows: ", Object.entries(selectedRows)[0]);
-  }; */
+  };  */
 
   const columns = [
     {
@@ -165,7 +163,7 @@ const Home = () => {
     },
     {
       name: "DOB",
-      selector: (row) => row.dob,
+      selector: (row) => row.dob.split("T")[0],
       center: true,
     },
     {
@@ -179,18 +177,12 @@ const Home = () => {
       center: true,
       grow: 2,
     },
-    {
-      name: "Parent Name",
-      selector: (row) => row.parentGuardianName,
-      center: true,
-      grow: 2,
-    },
   ];
 
   const expandableRowsComponent = () => {
     return (
       <>
-        <section className="m-3 p-3">
+        <div className="m-3">
           <h5 className="text-center">
             Thông Tin Về Sức Khỏe Để Tham Gia Chương Trình Trại Hè VAS 2023 /{" "}
             <i style={{ color: "blue" }}>
@@ -198,7 +190,10 @@ const Home = () => {
             </i>
           </h5>
           <hr />
-          <Form.Group className="mb-3" controlId="exampleForm.ControlInput">
+          <Form.Group
+            className="mb-2"
+            controlId="firstQuestionHealthControlInput"
+          >
             <p>
               Học sinh có tiền sửa bệnh tật/ dị ứng nào mà có thể nguy hiểm tới
               sức khỏe không ? (Ví dụ: dị ứng nghiêm trọng với thuốc, nọc của
@@ -215,6 +210,7 @@ const Home = () => {
                 If yes, please clearly explain condition and treatment:
               </i>
             </p>
+
             <InputGroup className="mb-3">
               <InputGroup.Checkbox
                 checked={checkedFirstQuestion}
@@ -222,11 +218,18 @@ const Home = () => {
                   setCheckedFirstQuestion(!checkedFirstQuestion);
                 }}
               />
-              <Form.Control
-                name="firstHealthQuestion"
-                disabled={!checkedFirstQuestion}
-                ref={refFirstQuestion}
-              />
+              {firstHealthQuestion === null ? (
+                <Form.Control
+                  name="firstHealthQuestion"
+                  disabled={!checkedFirstQuestion}
+                  ref={refFirstQuestion}
+                />
+              ) : (
+                <Form.Control
+                  name="firstHealthQuestion"
+                  defaultValue={firstHealthQuestion}
+                />
+              )}
             </InputGroup>
             <hr />
             <Form.Text>
@@ -245,7 +248,10 @@ const Home = () => {
             </Form.Text>
           </Form.Group>
           <hr />
-          <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
+          <Form.Group
+            className="mb-2"
+            controlId="secondQuestionHealthControlInput"
+          >
             <p>
               Học sinh có đang dùng thuốc hoặc đang điều trị mà có thể ảnh hưởng
               đến việc tham gia các hoạt động của Chương trình Trại hè không?
@@ -267,16 +273,22 @@ const Home = () => {
                   setCheckedSecondQuestion(!checkedSecondQuestion);
                 }}
               />
-              <Form.Control
-                name="secondHealthQuestion"
-                disabled={!checkedSecondQuestion}
-                ref={refSecondQuestion}
-                required
-              />
+              {secondHealthQuestion === null ? (
+                <Form.Control
+                  name="secondHealthQuestion"
+                  disabled={!checkedSecondQuestion}
+                  ref={refSecondQuestion}
+                />
+              ) : (
+                <Form.Control
+                  name="secondHealthQuestion"
+                  defaultValue={secondHealthQuestion}
+                />
+              )}
             </InputGroup>
           </Form.Group>
           <hr />
-        </section>
+        </div>
       </>
     );
   };
@@ -294,7 +306,8 @@ const Home = () => {
           style={{ width: "42rem" }}
         >
           <Alert.Heading>
-            Oh snap! You got an error! Please try again or contact admission officer
+            Oh snap! You got an error! Please try again or contact admission
+            officer
           </Alert.Heading>
         </Alert>
       </center>
@@ -342,7 +355,12 @@ const Home = () => {
                         placeholder="email"
                         onChange={handleValidateLogin}
                       />
-                      <Button size="lg" variant="danger" onClick={handleGetOtp} disabled={validateLogin} >
+                      <Button
+                        size="lg"
+                        variant="danger"
+                        onClick={handleGetOtp}
+                        disabled={validateLogin}
+                      >
                         Log In
                       </Button>
                     </InputGroup>
@@ -391,7 +409,6 @@ const Home = () => {
           {isLogin && !isGettingOTP && (
             <div ref={dataTable}>
               <div className="container">
-                
                 <h3 className="text-center">Students Profiles</h3>
                 <DataTable
                   columns={columns}
@@ -401,48 +418,56 @@ const Home = () => {
                   responsive
                   highlightOnHover
                   /* selectableRows
-                    onSelectedRowsChange={handleSelectRow} */
+                  onSelectedRowsChange={handleSelectRow} */
                 />
               </div>
-              <center>
-                <Form.Check
-                  size="lg"
-                  type="checkbox"
-                  onChange={() => {
-                    if (readyToConfirm) {
-                      setReadyToConfirm(false);
-                    } else {
-                      setReadyToConfirm(true);
-                    }
-                  }}
-                  inline
-                />{" "}
-                I confirm I have read the <a className="text-danger" style={{fontSize:18}} href={Handbook}><strong>handbook file</strong></a> carefully and take
-                responsibilities if anything happens
-                <Button
-                  className="ms-3"
-                  size="md"
-                  variant="success"
-                  disabled={!readyToConfirm}
-                  onClick={handleSubmit}
-                >
-                  Confirm
-                </Button>
-              </center>
+              
+                <center className="m-3">
+                  <Form.Check
+                    size="lg"
+                    type="checkbox"
+                    onChange={() => {
+                      if (readyToConfirm) {
+                        setReadyToConfirm(false);
+                      } else {
+                        setReadyToConfirm(true);
+                      }
+                    }}
+                    inline
+                  />{" "}
+                  I confirm I have read the{" "}
+                  <a
+                    className="text-danger"
+                    style={{ fontSize: 18 }}
+                    href={Handbook}
+                  >
+                    <strong>handbook file</strong>
+                  </a>{" "}
+                  carefully and take responsibilities if anything happens
+                  <Button
+                    className="ms-3"
+                    size="md"
+                    variant="success"
+                    disabled={!readyToConfirm}
+                    onClick={handleSubmit}
+                  >
+                    Confirm
+                  </Button>
+                </center>
             </div>
           )}
         </section>
       </div>
       <div
-        className="container-fluid bg-danger text-center text-white m-0 py-1 d-flex flex-column justify-content-center"
+        className="container-fluid bg-secondary text-center text-white m-0 py-1 d-flex flex-column justify-content-center"
         style={{
-          position: "absolute",
+          position: "fix",
           bottom: "0",
           width: "100%",
           height: "4rem",
         }}
       >
-        <p className="m-0">&copy;Vietnam Australian School 2023</p>
+        <p className="m-0">&copy; VIETNAM AUSTRALIAN SCHOOL  2023</p>
       </div>
     </div>
   );
