@@ -1,5 +1,5 @@
 {
-  "proxy": "https://localhost:7077",
+  "proxy": "http://localhost:5286",
   "name": "summer-handbook-app",
   "version": "0.1.0",
   "private": true,
