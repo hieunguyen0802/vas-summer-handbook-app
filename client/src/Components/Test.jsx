@@ -8,7 +8,7 @@ import Button from "react-bootstrap/Button";
 import Col from "react-bootstrap/Col";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import DataTable from "react-data-table-component";
 import Alert from "react-bootstrap/Alert";
 import Card from "react-bootstrap/Card";
@@ -20,26 +20,52 @@ export default function TextFields() {
   const [studentTable, setStudentTable] = useState();
   const [show, setShow] = useState(false);
   const [dataModal, setDataModal] = useState()
-  const [ans,setAns] = useState()
+
+
   const stuCode = dataModal != null ? dataModal.studentCode : dataModal
+  
+  const ansStuCode = "ans" + stuCode
+  const ansStuCode1 = "ans1" + stuCode
+  let ans, ans1x
+
+ 
+
   const firstDomId = "firstQuestion" + stuCode
   const secondDomId = "secondQuestion" + stuCode
+  
+  
+  
   const handleClose = () => setShow(false);
   const handleShow = (row) => {
     setDataModal(row);
     setShow(true);
   }
   
+  function updateSessionStorage(value){
+    let prevData = JSON.parse(sessionStorage.getItem('queryData'));
+    Object.keys(value).forEach(function(val, key){
+         prevData[val] = value[val];
+    })
+    sessionStorage.setItem('queryData', JSON.stringify(prevData));
+}
   const handleSave = (data) => {
-    console.log(refFirstQuestion.current.value)
-    console.log(refSecondQuestion.current.value)
+    const a = document.getElementById(firstDomId).value
+    const b = document.getElementById(secondDomId).value
+    data.firstHealthQuestion = a
+    data.secondHealthQuestion = b
+    sessionStorage.setItem(firstDomId,data.firstHealthQuestion)
+    sessionStorage.setItem(secondDomId,data.secondHealthQuestion)
+
+    ans = data.firstHealthQuestion
+    ans1 = data.secondHealthQuestion
+    console.log(ans,ans1)
     console.log(data)
+    sessionStorage.setItem(stuCode,JSON.stringify(data))
     setShow(false)
    
   }
-  const ExpandedComponent = ({ data }) => <input ref={refFirstQuestion}/>
-
   
+
 
   const handleClick = async () => {
     const params = "thuyduong032201@gmail.com";
@@ -104,10 +130,9 @@ export default function TextFields() {
         </Modal.Header>
         <Modal.Body>
           <div className="m-3">
-            <div id = {firstDomId}> 
+            <div> 
               <Form.Group
                 className="mb-2"
-                controlId="firstQuestionHealthControlInput"
               >
                 <p>
                   Học sinh có tiền sửa bệnh tật/ dị ứng nào mà có thể nguy hiểm
@@ -129,11 +154,11 @@ export default function TextFields() {
 
                 <InputGroup className="mb-3">
                     <Form.Control
-                      key = {firstDomId}
-                      id = {firstDomId}
                       name={firstDomId}
-                      value={ans} onChange={(e) => setAns(e.target.value)}
-                      //ref={refFirstQuestion}
+                      id={firstDomId}
+                      //value={ans} onChange={(e) => setAns(e.target.value)}
+                      defaultValue={ans != null ? ans : null}
+                      
                     />
                 </InputGroup>
                 <hr />
@@ -156,10 +181,9 @@ export default function TextFields() {
             </div>
            
             <hr />
-            <div id = {secondDomId}> 
+            <div> 
               <Form.Group
                 className="mb-2"
-                controlId="secondQuestionHealthControlInput"
               >
                 <p>
                   Học sinh có đang dùng thuốc hoặc đang điều trị mà có thể ảnh
@@ -176,10 +200,10 @@ export default function TextFields() {
                   <i style={{ color: "blue" }}>If yes, please explain. If no, please leave blank</i>{" "}
                 </p>
                 <InputGroup className="mb-3">
-                    <Form.Control
-                      id = {secondDomId}
+                    <Form.Control 
+                      defaultValue={ans1 != null ? ans1 : null}
                       name={secondDomId}
-                      ref={refSecondQuestion}
+                      id={secondDomId}
                     />
                   
                 </InputGroup>
@@ -192,7 +216,7 @@ export default function TextFields() {
           <Button variant="secondary" onClick={handleClose}>
             Close
           </Button>
-          <Button variant="primary" onClick={()=>handleSave({refFirstQuestion,refSecondQuestion,dataModal})}>
+          <Button variant="primary" onClick={()=>handleSave(dataModal)}>
             Save Changes
           </Button>
         </Modal.Footer>
@@ -202,13 +226,10 @@ export default function TextFields() {
           <Button onClick={handleClick}>click</Button>
           <h3 className="text-center">Students Profiles</h3>
           <DataTable
-            keyField={stuCode}
             columns={columns}
             data={studentTable}
             responsive
             highlightOnHover
-            expandableRows={true}
-        		expandableRowsComponent={ExpandedComponent}
           />
         </div>
       </div>
